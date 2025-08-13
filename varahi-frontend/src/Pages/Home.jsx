@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProductCardUI from "../Components/ProductCardUI";
 import { GiDress } from "react-icons/gi";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../Firebase.js";
 import { motion } from "framer-motion";
 const Home = () => {
   const [products, setProducts] = useState([]);
