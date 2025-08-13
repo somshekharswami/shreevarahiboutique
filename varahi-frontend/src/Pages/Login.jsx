@@ -1,6 +1,6 @@
 import { useNavigate, Navigate } from "react-router-dom";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../Firebase.js";
 import { useAuth } from "../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
 import { FaArrowRight } from "react-icons/fa";
