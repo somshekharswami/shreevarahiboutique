@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { fetchCart } from "../redux/slices/cartSlice";
 import { setCurrentUser, clearCurrentUser } from "../redux/slices/authSlice";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../Firebase.js";
 
 const AuthContext = createContext();
 
