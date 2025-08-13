@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Testing Kurti Page matches snapshot 1`] = `
+<DocumentFragment>
+  <section
+    class="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 py-12 px-4 sm:px-10"
+  >
+    <div
+      class="max-w-7xl mx-auto"
+    >
+      <div
+        class="text-center mb-10"
+      >
+        <h1
+          class="text-3xl md:text-5xl font-serif font-semibold text-[#b11257] text-center mt-1"
+        >
+          Kurti Collection
+        </h1>
+        <p
+          class="text-md sm:text-lg text-gray-700 font-light font-serif max-w-2xl mx-auto leading-relaxed"
+        >
+          Explore the elegance of our handpicked Kurti
+        </p>
+      </div>
+      <div
+        class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-md overflow-hidden group hover:shadow-xl transition-shadow duration-300"
+        >
+          <a
+            class="block"
+            data-discover="true"
+            href="/product/1"
+          >
+            <div
+              class="relative overflow-hidden bg-gray-50"
+            >
+              <img
+                alt="Kurti A"
+                class="w-full h-48 sm:h-56 object-contain group-hover:scale-105 transition-transform duration-300 p-2"
+              />
+            </div>
+            <div
+              class="p-4"
+            >
+              <h2
+                class="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors font-serif"
+              >
+                Kurti A
+              </h2>
+              <p
+                class="text-gray-700 text-sm sm:text-base font-normal font-serif line-clamp-2 mb-2"
+              />
+              <div
+                class="flex items-center justify-between mb-3"
+              >
+                <div
+                  class="text-xl font-sans"
+                >
+                  <span
+                    class="line-through text-pink-700 mr-2"
+                  >
+                    ₹N/A
+                  </span>
+                  <span
+                    class="font-bold text-green-700"
+                  >
+                    ₹400
+                  </span>
+                </div>
+              </div>
+              <button
+                class="w-full font-sans px-4 py-2 mt-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl shadow-md transition-all duration-200"
+              >
+                View Item
+              </button>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</DocumentFragment>
+`;

@@ -1,0 +1,2 @@
+# Ignore generated invoices folder inside backend
+invoices/

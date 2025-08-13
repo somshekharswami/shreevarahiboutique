@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Varahi Boutique | Invoice</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+      color: #4a4a4a;
+      background-color: #fff8f6;
+      padding: 40px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #d63384;
+      margin-bottom: 0;
+    }
+
+    .header, .footer {
+      text-align: right;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .customer-info, .invoice-info {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(214, 51, 132, 0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(214, 51, 132, 0.08);
+    }
+
+    th {
+      background-color: #ffe9f2;
+      color: #d63384;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      font-size: 14px;
+      color: #333;
+      border-top: 1px solid #fce4ec;
+    }
+
+    .total-line {
+      text-align: right;
+      font-weight: 600;
+      background-color: #fff7fa;
+      border-top: 2px solid #f9d7e3;
+    }
+
+    .amount {
+      text-align: right;
+    }
+
+    .footer p {
+      font-size: 14px;
+      margin-top: 40px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="section header">
+    <h1>Invoice</h1>
+    <p><strong>Invoice #:</strong> {{orderNumber}}</p>
+    <p><strong>Date:</strong> {{orderDate}}</p>
+  </div>
+
+  <div class="section customer-info info-box">
+    <div>
+      <p><strong>Customer Name:</strong> {{customerName}}</p>
+      <p><strong>Email:</strong> {{customerEmail}}</p>
+      <p><strong>Phone:</strong> {{customerPhone}}</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+        <tr>
+          <td>{{title}}</td>
+          <td>{{quantity}}</td>
+          <td class="amount">₹{{price}}</td>
+          <td class="amount">₹{{subtotal}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <table>
+      <tr class="total-line">
+        <td colspan="3">Subtotal:</td>
+        <td class="amount">₹{{subtotal}}</td>
+      </tr>
+      <tr class="total-line">
+        <td colspan="3">Shipping:</td>
+        <td class="amount">₹{{shipping}}</td>
+      </tr>
+      <tr class="total-line">
+        <td colspan="3"><strong>Total:</strong></td>
+        <td class="amount"><strong>₹{{total}}</strong></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section footer">
+    <p>Thank you for shopping with <strong>Varahi Boutique</strong> ✨</p>
+  </div>
+
+</body>
+</html>
