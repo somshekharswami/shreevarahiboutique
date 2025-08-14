@@ -195,7 +195,6 @@ const CartCheckout = () => {
                   method: "DELETE",
                 }
               );
-
               navigate(`/my-orders`, {
                 replace: true,
               });
@@ -281,7 +280,7 @@ const CartCheckout = () => {
   }
 
   // ✅ Show payment processing message if payment is in progress and cart is empty
-  if (paymentInProgress && cartItems.length === 0) {
+  if (paymentInProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
