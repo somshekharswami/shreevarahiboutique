@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import axios from "axios";
+import api from "../api/api";
 import debounce from "lodash/debounce";
 import ProductCardUI from "../Components/ProductCardUI";
 import Home from "../Pages/Home";
@@ -17,8 +17,8 @@ const Layout = () => {
 
   // Fetch all products once
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/products")
+    api
+      .get("/api/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
   }, []);

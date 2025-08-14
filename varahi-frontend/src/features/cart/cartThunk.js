@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../api/api"
 
 export const saveCart = createAsyncThunk(
   "cart/saveCart",
@@ -23,7 +23,7 @@ export const saveCart = createAsyncThunk(
 
    
     
-    await axios.post(`http://localhost:5000/cart/${firebaseUID}`, { items });
+    await api.post(`/cart/${firebaseUID}`, { items });
     return cartItems;
   }
 );
@@ -52,6 +52,6 @@ export const syncCartToDB = createAsyncThunk(
         };
       });
 
-    await axios.post(`http://localhost:5000/cart/${firebaseUID}`, { items });
+    await api.post(`/cart/${firebaseUID}`, { items });
   }
 );

@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "api";
 
 // ✅ Fetch cart from backend
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (firebaseUID) => {
    
-    const res = await axios.get(`http://localhost:5000/cart/${firebaseUID}`);
+    const res = await api.get(`/cart/${firebaseUID}`);
    
     return res.data.items || [];
   }
@@ -32,7 +32,7 @@ export const saveCart = createAsyncThunk(
       });
 
    
-    await axios.post(`http://localhost:5000/cart/${firebaseUID}`, { items });
+    await api.post(`/cart/${firebaseUID}`, { items });
     return cartItems;
   }
 );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import api from "../api/api";
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,9 +8,7 @@ const AdminOrders = () => {
   useEffect(() => {
     const fetchAllOrders = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:5000/api/orders/admin-orderr"
-        );
+        const res = await api.get("/api/orders/admin-orderr");
         if (!res.ok) throw new Error("Failed to fetch all orders");
         const data = await res.json();
         setOrders(data);

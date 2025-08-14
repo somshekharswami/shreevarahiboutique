@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios"; 
+import api from "../api/api";
 import ProductCardUI from "../Components/ProductCardUI";
 
 const SearchResults = () => {
@@ -11,7 +11,7 @@ const SearchResults = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await axios.get(`/api/products/search?q=${query}`);
+        const res = await api.get(`/api/products/search?q=${query}`);
         setResults(res.data);
       } catch (error) {
         console.error("Search failed", error);

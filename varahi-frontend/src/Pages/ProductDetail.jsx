@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { GiDress } from "react-icons/gi";
+import api from "../api/api";
 import "react-medium-image-zoom/dist/styles.css";
 import {
   addToCart,
@@ -29,7 +30,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await api.get(`/api/products/${id}`);
         const data = await res.json();
         setProduct(data);
       } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import ProductCardUI from "../Components/ProductCardUI";
@@ -8,8 +8,8 @@ const Kurti = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/products")
+    api
+      .get("/api/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.log(err));
   }, []);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../api/api";
 
 const ContactPage = () => {
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -15,10 +15,7 @@ const ContactPage = () => {
     setButtonDisabled(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/contact",
-        data
-      );
+      const response = await api.post("/api/contact", data);
       if (response.data.success) {
         reset();
       } else {

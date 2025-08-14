@@ -5,6 +5,7 @@ import { GiDress } from "react-icons/gi";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../Firebase.js";
 import { motion } from "framer-motion";
+import api from "../api/api.js";
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +13,7 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/products");
+      const res = await api.get("/api/products");
       const data = await res.json();
       setProducts(data);
     } catch (error) {
