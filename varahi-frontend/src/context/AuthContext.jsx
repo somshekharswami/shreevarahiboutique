@@ -4,6 +4,7 @@ import { fetchCart } from "../redux/slices/cartSlice";
 import { setCurrentUser, clearCurrentUser } from "../redux/slices/authSlice";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../Firebase.js";
+import api from "../api/api";
 
 const AuthContext = createContext();
 
@@ -40,14 +41,7 @@ export const AuthProvider = ({ children }) => {
 
           // Optional: send user to your backend
           try {
-            const res = await fetch("http://localhost:5000/api/users", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(simplifiedUser),
-            });
-            if (!res.ok) throw new Error("Failed to send user to MongoDB");
+            const res = await api.post("/api/users", simplifiedUser);
           } catch (err) {
             console.error("❌ Error sending user to MongoDB:", err);
           }
