@@ -31,8 +31,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const res = await api.get(`/api/products/${id}`);
-        const data = await res.json();
-        setProduct(data);
+        setProduct(res.data);
       } catch (error) {
         console.error("Error fetching product:", error);
       } finally {

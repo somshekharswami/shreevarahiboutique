@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchCart, clearCart } from "../redux/slices/cartSlice";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import api from "../api/api";
 
 const CartCheckout = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,7 @@ const CartCheckout = () => {
   const user = useSelector((state) => state.auth.user);
 
   const [loading, setLoading] = useState(false);
-  const [paymentInProgress, setPaymentInProgress] = useState(false); // ✅ Add payment progress state
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || currentUser?.name || "",
     phone: user?.phone || "",
@@ -25,7 +26,6 @@ const CartCheckout = () => {
     pincode: "",
   });
 
-  // Debug logging
   useEffect(() => {}, [
     currentUser,
     cartItems,
@@ -34,14 +34,12 @@ const CartCheckout = () => {
     paymentInProgress,
   ]);
 
-  // ✅ Modified: Don't redirect if payment is in progress
   useEffect(() => {
     if (!authLoading && !currentUser) {
       navigate("/login");
       return;
     }
 
-    // ✅ Don't redirect to cart if payment is in progress
     if (
       !authLoading &&
       currentUser &&
@@ -60,7 +58,6 @@ const CartCheckout = () => {
     paymentInProgress,
   ]);
 
-  // Refresh cart when component mounts
   useEffect(() => {
     if (
       currentUser &&
@@ -103,42 +100,30 @@ const CartCheckout = () => {
     try {
       setLoading(true);
 
-      // Call backend to validate cart and create Razorpay order
-      const res = await fetch("http://localhost:5000/api/checkout/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firebaseUID: currentUser.uid,
-          address: form,
-        }),
+      const res = await api.post("/api/checkout/start", {
+        firebaseUID: currentUser.uid,
+        address: form,
       });
+      const data = res.data;
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (data.message && data.message.includes("Price")) {
-          toast.error("Product prices have changed. Please review your cart.");
-          navigate("/cart");
-          return;
-        }
-        if (data.message && data.message.includes("not found")) {
-          toast.error(
-            "Some items are no longer available. Please review your cart."
-          );
-          navigate("/cart");
-          return;
-        }
-        throw new Error(data.message || "Checkout failed.");
+      if (data.message && data.message.includes("Price")) {
+        toast.error("Product prices have changed. Please review your cart.");
+        navigate("/cart");
+        return;
       }
-
+      if (data.message && data.message.includes("not found")) {
+        toast.error(
+          "Some items are no longer available. Please review your cart."
+        );
+        navigate("/cart");
+        return;
+      }
       if (!data.orderId) {
         throw new Error("Failed to create order. Please try again.");
       }
 
-      // ✅ Set payment in progress BEFORE opening Razorpay modal
       setPaymentInProgress(true);
 
-      // Open Razorpay modal
       const options = {
         key: data.keyId,
         amount: data.amount,
@@ -148,41 +133,30 @@ const CartCheckout = () => {
         order_id: data.orderId,
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(
-              "http://localhost:5000/payment/verify",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  firebaseUID: currentUser.uid,
-                  cartItems: cartItems.map((item) => {
-                    const product = item.productId || item;
-                    return {
-                      productId: product._id,
-                      title: product.title,
-                      imageUrl: product.imageUrl,
-                      size: item.size || "",
-                      price: product.price,
-                      quantity: item.quantity,
-                    };
-                  }),
-                  shippingAddress: form,
-                }),
-              }
-            );
+            const verifyRes = await api.post("/payment/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              firebaseUID: currentUser.uid,
+              cartItems: cartItems.map((item) => {
+                const product = item.productId || item;
+                return {
+                  productId: product._id,
+                  title: product.title,
+                  imageUrl: product.imageUrl,
+                  size: item.size || "",
+                  price: product.price,
+                  quantity: item.quantity,
+                };
+              }),
+              shippingAddress: form,
+            });
 
-            const verifyJson = await verifyRes.json();
-            if (verifyJson.status === "success") {
+            if (verifyRes.data.status === "success") {
               toast.success("✅ Payment verified!");
               dispatch(clearCart());
 
-              // Clear backend cart
-              await fetch(`http://localhost:5000/cart/${currentUser.uid}`, {
-                method: "DELETE",
-              });
+              await api.delete(`/cart/${currentUser.uid}`);
 
               navigate(`/my-orders`, {
                 replace: true,
@@ -212,7 +186,7 @@ const CartCheckout = () => {
         modal: {
           ondismiss: () => {
             setLoading(false);
-            setPaymentInProgress(false); // ✅ Reset payment state on dismiss
+            setPaymentInProgress(false);
             toast.info("Payment cancelled");
           },
         },
@@ -226,7 +200,7 @@ const CartCheckout = () => {
           `Payment failed: ${response.error.description || "Please try again."}`
         );
         setLoading(false);
-        setPaymentInProgress(false); // ✅ Reset payment state on failure
+        setPaymentInProgress(false);
       });
 
       rzp.open();
@@ -234,11 +208,10 @@ const CartCheckout = () => {
       console.error("💥 Error during checkout:", err);
       toast.error(err.message || "Something went wrong during checkout");
       setLoading(false);
-      setPaymentInProgress(false); // ✅ Reset payment state on error
+      setPaymentInProgress(false);
     }
   };
 
-  // Show loading while auth is loading or cart is loading
   if (authLoading || cartStatus === "loading") {
     return (
       <div className="min-h-screen flex items-center bg-gradient-to-br from-pink-100 to-purple-100 justify-center">
@@ -250,7 +223,6 @@ const CartCheckout = () => {
     );
   }
 
-  // Show message if no user
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -267,7 +239,6 @@ const CartCheckout = () => {
     );
   }
 
-  // ✅ Show payment processing message if payment is in progress and cart is empty
   if (paymentInProgress && cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -282,7 +253,6 @@ const CartCheckout = () => {
     );
   }
 
-  // ✅ Show message if cart is empty and payment is not in progress
   if (cartItems.length === 0 && !paymentInProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center">

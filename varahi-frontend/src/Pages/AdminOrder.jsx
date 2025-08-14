@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
+
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,9 +10,13 @@ const AdminOrders = () => {
     const fetchAllOrders = async () => {
       try {
         const res = await api.get("/api/orders/admin-orderr");
-        if (!res.ok) throw new Error("Failed to fetch all orders");
-        const data = await res.json();
-        setOrders(data);
+
+        // Axios responses do not have res.ok — check status instead
+        if (res.status < 200 || res.status >= 300) {
+          throw new Error("Failed to fetch all orders");
+        }
+
+        setOrders(res.data);
       } catch (err) {
         console.error(err);
         setError("Error fetching orders");
@@ -37,6 +42,7 @@ const AdminOrders = () => {
           key={order._id}
           className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 mb-8"
         >
+          {/* Order Info */}
           <div className="flex flex-wrap justify-between text-sm text-gray-600 mb-2">
             <div>
               <strong>Order Number:</strong> {order.orderNumber}
@@ -56,6 +62,7 @@ const AdminOrders = () => {
             </div>
           </div>
 
+          {/* Items */}
           <div className="mt-4">
             <h4 className="font-semibold text-gray-800 mb-1">📦 Items:</h4>
             <ul className="ml-4 list-disc text-sm text-gray-700">
@@ -68,6 +75,7 @@ const AdminOrders = () => {
             </ul>
           </div>
 
+          {/* Shipping Info */}
           <div className="mt-4">
             <h4 className="font-semibold text-gray-800 mb-1">
               🚚 Shipping Info:
@@ -82,11 +90,12 @@ const AdminOrders = () => {
             </p>
           </div>
 
+          {/* Payment Info */}
           <div className="mt-4">
             <h4 className="font-semibold text-gray-800 mb-1">💳 Payment:</h4>
-            <p>Razorpay Order ID: {order.payment.razorpay_order_id}</p>
-            <p>Razorpay Payment ID: {order.payment.razorpay_payment_id}</p>
-            <p>Status: {order.payment.status}</p>
+            <p>Razorpay Order ID: {order.payment?.razorpay_order_id}</p>
+            <p>Razorpay Payment ID: {order.payment?.razorpay_payment_id}</p>
+            <p>Status: {order.payment?.status}</p>
           </div>
         </div>
       ))}

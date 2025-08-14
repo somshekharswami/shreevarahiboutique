@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -33,10 +34,9 @@ const AdminDashboard = () => {
   const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
+    const { name, value, type, checked, files } = e.target;
     if (name === "image") {
-      setForm({ ...form, image: e.target.files[0] });
+      setForm({ ...form, image: files[0] });
     } else if (name === "isFreeSize") {
       setForm({
         ...form,
@@ -97,21 +97,17 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await fetch("http://localhost:5000/admin/products/add", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      await api.post("/admin/products/add", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        alert("✅ Product uploaded");
-        navigate("/");
-      } else {
-        setError(data.message || "Upload failed");
-      }
+      alert("✅ Product uploaded");
+      navigate("/");
     } catch (err) {
-      setError("Server error");
+      setError(err.response?.data?.message || "Server error");
     }
   };
 
@@ -160,7 +156,6 @@ const AdminDashboard = () => {
           ))}
         </select>
 
-        {/* Free Size Toggle */}
         <label className="flex items-center gap-2 font-medium">
           <input
             type="checkbox"
@@ -172,7 +167,6 @@ const AdminDashboard = () => {
           This is a free-size product
         </label>
 
-        {/* Free-size price fields */}
         {form.isFreeSize && (
           <div className="space-y-2">
             <input
@@ -196,7 +190,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Sizes list for size-based products */}
         {!form.isFreeSize && (
           <div>
             <label className="font-semibold text-[#B19A99]">Add Sizes:</label>

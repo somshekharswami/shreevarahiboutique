@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { GiDress } from "react-icons/gi";
+import api from "../api/api";
+
 const MyOrders = () => {
   const { currentUser, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -10,18 +12,20 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       if (!currentUser?.uid) {
-        setError("Login to See your Orders");
+        setError("Login to see your orders");
         setLoading(false);
         return;
       }
 
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/orders/user/${currentUser.uid}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch orders");
-        const data = await res.json();
-        setOrders(data);
+        const res = await api.get(`/api/orders/user/${currentUser.uid}`);
+
+        // Axios does not use res.ok — check status instead
+        if (res.status < 200 || res.status >= 300) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        setOrders(res.data);
       } catch (err) {
         console.error(err);
         setError("Something went wrong while fetching your orders.");
@@ -115,7 +119,8 @@ const MyOrders = () => {
                     <span className="font-semibold text-gray-800">
                       {item.title}
                     </span>{" "}
-                    ({item.size}) × {item.quantity} – ₹{item.price}
+                    ({item.size || "Free size"}) × {item.quantity} – ₹
+                    {item.price}
                   </li>
                 ))}
               </ul>
@@ -130,7 +135,7 @@ const MyOrders = () => {
                 href="tel:+918355907193"
                 className="mt-3 sm:mt-0 text-pink-600 hover:underline font-medium flex items-center gap-1"
               >
-                "Need changes? Cancel or edit order — 📞 +91 83559 07193."
+                Need changes? Cancel or edit order — 📞 +91 83559 07193
               </a>
             </div>
           </div>
