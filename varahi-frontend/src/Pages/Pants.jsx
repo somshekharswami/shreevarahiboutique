@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "api";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import ProductCardUI from "../Components/ProductCardUI";
