@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { fetchCart, clearCart } from "../redux/slices/cartSlice";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import api from "../api/api";
 
 const CartCheckout = () => {
   const dispatch = useDispatch();
@@ -15,7 +14,7 @@ const CartCheckout = () => {
   const user = useSelector((state) => state.auth.user);
 
   const [loading, setLoading] = useState(false);
-  const [paymentInProgress, setPaymentInProgress] = useState(false);
+  const [paymentInProgress, setPaymentInProgress] = useState(false); // ✅ Add payment progress state
   const [form, setForm] = useState({
     name: user?.name || currentUser?.name || "",
     phone: user?.phone || "",
@@ -26,20 +25,25 @@ const CartCheckout = () => {
     pincode: "",
   });
 
-  useEffect(() => {}, [
-    currentUser,
-    cartItems,
-    cartStatus,
-    authLoading,
-    paymentInProgress,
-  ]);
+  // Debug logging
+  useEffect(() => {
+    console.log("CartCheckout - currentUser:", currentUser);
+    console.log("CartCheckout - cartItems:", cartItems);
+    console.log("CartCheckout - cartItems length:", cartItems.length);
+    console.log("CartCheckout - cartStatus:", cartStatus);
+    console.log("CartCheckout - authLoading:", authLoading);
+    console.log("CartCheckout - paymentInProgress:", paymentInProgress);
+  }, [currentUser, cartItems, cartStatus, authLoading, paymentInProgress]);
 
+  // ✅ Modified: Don't redirect if payment is in progress
   useEffect(() => {
     if (!authLoading && !currentUser) {
+      console.log("No user authenticated, redirecting to login");
       navigate("/login");
       return;
     }
 
+    // ✅ Don't redirect to cart if payment is in progress
     if (
       !authLoading &&
       currentUser &&
@@ -47,6 +51,7 @@ const CartCheckout = () => {
       cartStatus !== "loading" &&
       !paymentInProgress
     ) {
+      console.log("Cart is empty and not loading, redirecting to cart page");
       navigate("/cart");
     }
   }, [
@@ -58,6 +63,7 @@ const CartCheckout = () => {
     paymentInProgress,
   ]);
 
+  // Refresh cart when component mounts
   useEffect(() => {
     if (
       currentUser &&
@@ -65,6 +71,7 @@ const CartCheckout = () => {
       cartStatus === "idle" &&
       !paymentInProgress
     ) {
+      console.log("Refreshing cart data");
       dispatch(fetchCart(currentUser.uid));
     }
   }, [currentUser, dispatch, cartItems.length, cartStatus, paymentInProgress]);
@@ -100,30 +107,45 @@ const CartCheckout = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/api/checkout/start", {
-        firebaseUID: currentUser.uid,
-        address: form,
-      });
-      const data = res.data;
+      // Call backend to validate cart and create Razorpay order
+      const res = await fetch(
+        "https://shreevarahiboutique-backend.onrender.com/api/checkout/start",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firebaseUID: currentUser.uid,
+            address: form,
+          }),
+        }
+      );
 
-      if (data.message && data.message.includes("Price")) {
-        toast.error("Product prices have changed. Please review your cart.");
-        navigate("/cart");
-        return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.message && data.message.includes("Price")) {
+          toast.error("Product prices have changed. Please review your cart.");
+          navigate("/cart");
+          return;
+        }
+        if (data.message && data.message.includes("not found")) {
+          toast.error(
+            "Some items are no longer available. Please review your cart."
+          );
+          navigate("/cart");
+          return;
+        }
+        throw new Error(data.message || "Checkout failed.");
       }
-      if (data.message && data.message.includes("not found")) {
-        toast.error(
-          "Some items are no longer available. Please review your cart."
-        );
-        navigate("/cart");
-        return;
-      }
+
       if (!data.orderId) {
         throw new Error("Failed to create order. Please try again.");
       }
 
+      // ✅ Set payment in progress BEFORE opening Razorpay modal
       setPaymentInProgress(true);
 
+      // Open Razorpay modal
       const options = {
         key: data.keyId,
         amount: data.amount,
@@ -133,30 +155,46 @@ const CartCheckout = () => {
         order_id: data.orderId,
         handler: async (response) => {
           try {
-            const verifyRes = await api.post("/payment/verify", {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              firebaseUID: currentUser.uid,
-              cartItems: cartItems.map((item) => {
-                const product = item.productId || item;
-                return {
-                  productId: product._id,
-                  title: product.title,
-                  imageUrl: product.imageUrl,
-                  size: item.size || "",
-                  price: product.price,
-                  quantity: item.quantity,
-                };
-              }),
-              shippingAddress: form,
-            });
+            console.log("✅ Payment successful, verifying...");
 
-            if (verifyRes.data.status === "success") {
+            const verifyRes = await fetch(
+              "https://shreevarahiboutique-backend.onrender.com/payment/verify",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  firebaseUID: currentUser.uid,
+                  cartItems: cartItems.map((item) => {
+                    const product = item.productId || item;
+                    return {
+                      productId: product._id,
+                      title: product.title,
+                      imageUrl: product.imageUrl,
+                      size: item.size || "",
+                      price: product.price,
+                      quantity: item.quantity,
+                    };
+                  }),
+                  shippingAddress: form,
+                }),
+              }
+            );
+
+            const verifyJson = await verifyRes.json();
+            if (verifyJson.status === "success") {
               toast.success("✅ Payment verified!");
               dispatch(clearCart());
 
-              await api.delete(`/cart/${currentUser.uid}`);
+              // Clear backend cart
+              await fetch(
+                `https://shreevarahiboutique-backend.onrender.com/cart/${currentUser.uid}`,
+                {
+                  method: "DELETE",
+                }
+              );
 
               navigate(`/my-orders`, {
                 replace: true,
@@ -185,8 +223,9 @@ const CartCheckout = () => {
         },
         modal: {
           ondismiss: () => {
+            console.log("💳 Payment modal dismissed");
             setLoading(false);
-            setPaymentInProgress(false);
+            setPaymentInProgress(false); // ✅ Reset payment state on dismiss
             toast.info("Payment cancelled");
           },
         },
@@ -200,7 +239,7 @@ const CartCheckout = () => {
           `Payment failed: ${response.error.description || "Please try again."}`
         );
         setLoading(false);
-        setPaymentInProgress(false);
+        setPaymentInProgress(false); // ✅ Reset payment state on failure
       });
 
       rzp.open();
@@ -208,10 +247,11 @@ const CartCheckout = () => {
       console.error("💥 Error during checkout:", err);
       toast.error(err.message || "Something went wrong during checkout");
       setLoading(false);
-      setPaymentInProgress(false);
+      setPaymentInProgress(false); // ✅ Reset payment state on error
     }
   };
 
+  // Show loading while auth is loading or cart is loading
   if (authLoading || cartStatus === "loading") {
     return (
       <div className="min-h-screen flex items-center bg-gradient-to-br from-pink-100 to-purple-100 justify-center">
@@ -223,6 +263,7 @@ const CartCheckout = () => {
     );
   }
 
+  // Show message if no user
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -239,6 +280,7 @@ const CartCheckout = () => {
     );
   }
 
+  // ✅ Show payment processing message if payment is in progress and cart is empty
   if (paymentInProgress && cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -253,6 +295,7 @@ const CartCheckout = () => {
     );
   }
 
+  // ✅ Show message if cart is empty and payment is not in progress
   if (cartItems.length === 0 && !paymentInProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center">
