@@ -5,7 +5,7 @@ import { GrCart } from "react-icons/gr";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../Firebase.js";
 
 const Navbar = ({ searchItem, onSearchChange, onClearSearch }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
