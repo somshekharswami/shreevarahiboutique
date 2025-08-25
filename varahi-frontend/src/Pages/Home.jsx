@@ -21,18 +21,7 @@ const Home = () => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // User is not logged in
-        setTimeout(() => {
-          navigate("/login"); // Redirect after a short delay
-        }, 10000);
-      }
-    });
 
-    return () => unsubscribe(); // Clean up listener on unmount
-  }, [navigate]);
   useEffect(() => {
     fetchProducts();
   }, []);
