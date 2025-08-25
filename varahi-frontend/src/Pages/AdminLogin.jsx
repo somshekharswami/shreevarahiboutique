@@ -15,14 +15,17 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/admin-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
-      });
+      const response = await fetch(
+        "https://shreevarahiboutique-backend.onrender.com/admin-login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: formData.username,
+            password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
