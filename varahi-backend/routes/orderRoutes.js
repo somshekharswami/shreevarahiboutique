@@ -11,7 +11,7 @@ router.get("/test", (req, res) => {
 });
 
 // GET all orders (admin only)
-router.get("/admin-orderr",verifyToken, async (req, res) => {
+router.get("/admin-orderr", async (req, res) => {
   try {
     const allOrders = await Order.find().sort({ createdAt: -1 }); // latest first
     res.json(allOrders);
