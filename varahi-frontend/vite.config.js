@@ -14,6 +14,6 @@ export default defineConfig({
     })
   ],
   build: {
-    sourcemap: true, // Needed for accurate size analysis
+    sourcemap: false, // Needed for accurate size analysis
   }
 });
